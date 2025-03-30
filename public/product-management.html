@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Product Management - SurgiMac</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    .editable:focus {
+      outline: 2px solid #007bff;
+      padding: 2px;
+    }
+    .editable {
+      min-width: 50px;
+      padding: 2px;
+      border-radius: 3px;
+    }
+    .table td {
+      vertical-align: middle;
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container">
+      <a class="navbar-brand" href="/">SurgiMac</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav">
+          <li class="nav-item">
+            <a class="nav-link" href="/">Home</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" href="/product-management">Product Management</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container mt-4">
+    <div id="alert-container"></div>
+    
+    <div class="row">
+      <div class="col-md-8">
+        <h2>Products</h2>
+        <p>Manage your products - update brand names and cost prices for accurate reporting.</p>
+      </div>
+      <div class="col-md-4 text-end">
+        <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#addProductForm">
+          Add New Product
+        </button>
+      </div>
+    </div>
+
+    <!-- Add Product Form -->
+    <div class="collapse mb-4" id="addProductForm">
+      <div class="card">
+        <div class="card-header">
+          <h5>Add New Product</h5>
+        </div>
+        <div class="card-body">
+          <form id="product-form">
+            <div class="row mb-3">
+              <div class="col-md-4">
+                <label for="sku" class="form-label">SKU *</label>
+                <input type="text" class="form-control" id="sku" required>
+              </div>
+              <div class="col-md-4">
+                <label for="brand_name" class="form-label">Brand Name *</label>
+                <input type="text" class="form-control" id="brand_name" required>
+              </div>
+              <div class="col-md-4">
+                <label for="cost_price" class="form-label">Cost Price *</label>
+                <input type="number" step="0.01" min="0" class="form-control" id="cost_price" required>
+              </div>
+            </div>
+            <button type="submit" class="btn btn-success">Add Product</button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bulk Import Form -->
+    <div class="card mb-4">
+      <div class="card-header">
+        <h5>Bulk Import Products</h5>
+      </div>
+      <div class="card-body">
+        <form id="import-form">
+          <div class="mb-3">
+            <label for="import-file" class="form-label">JSON File</label>
+            <input class="form-control" type="file" id="import-file" accept=".json">
+            <div class="form-text">
+              Upload a JSON file with an array of products. Each product should have SKU, brand_name, and cost_price fields.
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary">Import</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Products Table -->
+    <div class="card">
+      <div class="card-header">
+        <div class="row">
+          <div class="col-md-6">
+            <h5>Product List</h5>
+          </div>
+          <div class="col-md-6">
+            <input type="text" id="search-input" class="form-control" placeholder="Search products...">
+          </div>
+        </div>
+      </div>
+      <div class="card-body table-responsive">
+        <table class="table table-striped table-hover" id="products-table">
+          <thead>
+            <tr>
+              <th>SKU</th>
+              <th>Brand Name</th>
+              <th>Cost Price</th>
+              <th>Last Updated</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Products will be loaded here dynamically -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <footer class="bg-dark text-white mt-5 py-3">
+    <div class="container text-center">
+      <p>&copy; 2023 SurgiMac. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="/js/productManager.js"></script>
+</body>
+</html> 
