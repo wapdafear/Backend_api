@@ -84,9 +84,17 @@ router.get("/products/:Sku", async (req, res) => {
 router.post("/products", async (req, res) => {
   try {
     const { Sku, Description, Manufacturer, Cost } = req.body;
+    
+    // Ensure SKU is converted to string
+    const skuAsString = String(Sku);
 
-    // Check if product with Sku already exists
-    let product = await Product.findOne({ Sku });
+    // Check if product with Sku already exists - search for both string and number versions
+    let product = await Product.findOne({ 
+      $or: [
+        { Sku: skuAsString },
+        { Sku: Number(skuAsString) } // In case it's stored as a number
+      ] 
+    });
 
     if (product) {
       return res
@@ -96,7 +104,7 @@ router.post("/products", async (req, res) => {
 
     // Create new product
     product = new Product({
-      Sku,
+      Sku: skuAsString, // Ensure it's stored as string
       Description,
       Manufacturer,
       Cost,
@@ -114,15 +122,21 @@ router.post("/products", async (req, res) => {
 router.put("/products/:Sku", async (req, res) => {
   try {
     const { Description, Manufacturer, Cost } = req.body;
-    const sku = req.params.Sku;
+    const sku = String(req.params.Sku); // Ensure SKU is converted to string
 
     console.log('Updating product:', { sku, Description, Manufacturer, Cost });
 
-    // Update the product
+    // Update the product - search for both string and number versions
     const product = await Product.findOneAndUpdate(
-      { Sku: sku },
+      { 
+        $or: [
+          { Sku: sku },
+          { Sku: Number(sku) } // In case it's stored as a number
+        ] 
+      },
       {
         $set: {
+          Sku: sku, // Ensure it's stored as string
           Description: Description || '',
           Manufacturer: Manufacturer || '',
           Cost: Cost !== undefined ? parseFloat(Cost) : 0,
@@ -242,20 +256,21 @@ async function uploadCSVdata(data) {
   for (const row of data) {
     try {
       const { Sku, Description, Manufacturer, Cost } = row;
+      
+      // Ensure SKU is converted to string
+      const skuAsString = String(Sku);
 
-      // // Try to find existing product
-      let product = await Product.findOne({ Sku });
-      // product = new Product({
-      //   Sku,
-      //   Description: Description || "",
-      //   Manufacturer: Manufacturer || "",
-      //   Cost: Cost || 0,
-      // });
-      // await product.save();
-      // result.inserted++;
+      // Try to find existing product - search for both string and number versions
+      let product = await Product.findOne({ 
+        $or: [
+          { Sku: skuAsString },
+          { Sku: Number(skuAsString) } // In case it's stored as a number
+        ] 
+      });
 
       if (product) {
         // Update existing product
+        product.Sku = skuAsString; // Ensure it's stored as string
         product.Description = Description || product.Description;
         product.Manufacturer = Manufacturer || product.Manufacturer;
         product.Cost = Cost !== undefined ? Cost : product.Cost;
@@ -264,7 +279,7 @@ async function uploadCSVdata(data) {
       } else {
         // Create new product
         product = new Product({
-          Sku,
+          Sku: skuAsString, // Ensure it's stored as string
           Description: Description || "",
           Manufacturer: Manufacturer || "",
           Cost: Cost || 0,
@@ -276,7 +291,6 @@ async function uploadCSVdata(data) {
     catch (err) {
       result.errors.push({ Sku: row.Sku || "unknown", error: err.message });
     }
-    
   }
   return result;
 }
