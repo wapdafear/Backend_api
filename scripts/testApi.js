@@ -1,6 +1,6 @@
 const axios = require('axios');
 
-const API_URL = 'http://localhost:5000/api'; // adjust if your port is different
+const API_URL = 'https://backend-api-4679.onrender.com/api'; // adjust if your port is different
 
 async function testAPI() {
   try {

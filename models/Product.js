@@ -1,10 +1,10 @@
 const mongoose = require('mongoose');
 
 const ProductSchema = new mongoose.Schema({
-  VP_code: {
+  Sku: {
     type: String,
     required: true,
-    unique: true
+    // unique: true
   },
   Description: {
     type: String
@@ -12,18 +12,7 @@ const ProductSchema = new mongoose.Schema({
   Manufacturer: {
     type: String
   },
-  Brand: {
-    type: String
-  },
-  Status: {
-    type: String,
-    default: 'Active'
-  },
   Cost: {
-    type: Number,
-    default: 0
-  },
-  old_count: {
     type: Number,
     default: 0
   }
