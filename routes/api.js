@@ -69,10 +69,27 @@ router.get("/products", async (req, res) => {
 // Get single product
 router.get("/products/:Sku", async (req, res) => {
   try {
-    const product = await Product.findOne({ Sku: req.params.Sku });
+    const skuAsString = String(req.params.Sku);
+    
+    // Search for both string and numeric versions of the SKU
+    const product = await Product.findOne({ 
+      $or: [
+        { Sku: skuAsString },
+        { Sku: Number(skuAsString) } // In case it's stored as a number
+      ]
+    });
+    
     if (!product) {
       return res.status(404).json({ message: "Product not found" });
     }
+    
+    // Ensure SKU is stored as string for consistency going forward
+    if (typeof product.Sku !== 'string') {
+      product.Sku = String(product.Sku);
+      await product.save();
+      console.log(`Converted SKU ${req.params.Sku} to string during read`);
+    }
+    
     res.json(product);
   } catch (err) {
     console.error(err);
@@ -202,12 +219,21 @@ router.post("/products/bulk", async (req, res) => {
           result.errors.push({ Sku: "missing", error: "Sku is required" });
           continue;
         }
+        
+        // Ensure SKU is a string
+        const skuAsString = String(Sku);
 
-        // Try to find existing product
-        let product = await Product.findOne({ Sku });
+        // Try to find existing product - search for both string and number versions
+        let product = await Product.findOne({ 
+          $or: [
+            { Sku: skuAsString },
+            { Sku: Number(skuAsString) } // In case it's stored as a number
+          ] 
+        });
 
         if (product) {
           // Update existing product
+          product.Sku = skuAsString; // Ensure it's stored as string
           product.Description = Description || product.Description;
           product.Manufacturer = Manufacturer || product.Manufacturer;
           product.Cost = Cost !== undefined ? Cost : product.Cost;
@@ -216,7 +242,7 @@ router.post("/products/bulk", async (req, res) => {
         } else {
           // Create new product
           product = new Product({
-            Sku,
+            Sku: skuAsString, // Store as string
             Description: Description || "",
             Manufacturer: Manufacturer || "",
             Cost: Cost || 0,
@@ -235,6 +261,7 @@ router.post("/products/bulk", async (req, res) => {
     res.status(500).json({ message: "Server Error" });
   }
 });
+
 function csvToJson(csvFilePath) {
   return new Promise((resolve, reject) => {
       const results = [];
@@ -246,6 +273,7 @@ function csvToJson(csvFilePath) {
           .on('error', (err) => reject(err));
   });
 }
+
 async function uploadCSVdata(data) {
   const result = {
     inserted: 0,
@@ -294,6 +322,7 @@ async function uploadCSVdata(data) {
   }
   return result;
 }
+
 // Upload products from CSV
 router.post("/upload-products", upload.single("file"), async (req, res) => {
   try {
