@@ -14,39 +14,44 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
+// External API routes (these don't depend on MongoDB)
+app.use('/external', require('./routes/external'));
+
 // Connect to MongoDB with explicit database name
 const mongoURI = process.env.MONGO_URI;
 const dbName = 'product_inventory';
 
 mongoose.connect(mongoURI, {
-    dbName: dbName, // Explicitly set database name
+    dbName: dbName,
     useNewUrlParser: true,
     useUnifiedTopology: true
 })
 .then(() => {
     console.log(`MongoDB Connected to database: ${dbName}`);
     
-    // Only setup routes after MongoDB is connected
+    // Setup database-dependent routes
     app.use('/api', require('./routes/api'));
-    
-    // Start the server after MongoDB connection
-    const PORT = process.env.PORT || 5000;
-    app.listen(PORT, () => {
-        console.log(`Server running on port ${PORT}`);
-    });
+    app.use('/api/products', require('./routes/products'));
 })
 .catch(err => {
     console.error('MongoDB Connection Error:', err);
-    process.exit(1);
+    console.log('Continuing without database functionality');
 });
 
-// Routes
+// Static routes
 app.get('/product-management', (req, res) => {
   res.sendFile(path.join(__dirname, 'public/product-management.html'));
 });
 
-// Error handling
+// Error handling middleware
 app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({ message: 'Server Error' });
+  console.error('Server Error:', err.stack);
+  res.status(500).json({ message: 'Server Error', details: err.message });
+});
+
+// Start the server
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+    console.log(`External API routes available at http://localhost:${PORT}/external`);
 }); 

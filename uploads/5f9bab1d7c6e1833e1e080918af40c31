@@ -1,0 +1,4 @@
+Sku,Description,Manufacturer,Cost
+Testin123,Testing1,Testing1,1
+Testing456,Testing3,Testing1,2
+Testing456,,Testing1,2
